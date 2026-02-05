@@ -222,6 +222,12 @@ body {
     fill: #64748b;
 }
 
+/* Active/selected node - clearly highlighted */
+.node.active circle {
+    fill: #3b82f6;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
 /* Node labels */
 .node text {
     font-size: 12px;

@@ -82,7 +82,7 @@ function positionTooltip(x, y, isDetailed = false, nodeRadius = 8) {
 // Load contributor data from data.json
 // Cache busting: append timestamp to bypass browser/CDN caching
 const cacheBuster = new Date().getTime();
-d3.json(`../data.json?v=${cacheBuster}`, function (error, data) {
+d3.json(`./data.json?v=${cacheBuster}`, function (error, data) {
     if (error) {
         console.error("Error loading data:", error);
         alert("Error loading data.json. Please make sure the file exists.");
@@ -226,6 +226,10 @@ d3.json(`../data.json?v=${cacheBuster}`, function (error, data) {
         .on("click", function (d) {
             d3.event.stopPropagation();
 
+            // Clear active state from all nodes and add to clicked one
+            d3.selectAll(".node").classed("active", false);
+            d3.select(this.parentNode).classed("active", true);
+
             // Highlight corresponding sidebar card
             d3.selectAll(".person-card").classed("active", false);
             d3.select(`.person-card[data-id="${d.id}"]`).classed("active", true);
@@ -351,6 +355,7 @@ document.addEventListener('click', function (event) {
     if (tooltip.classed("detailed") && !event.target.closest('.node') && !event.target.closest('.person-card')) {
         tooltip.classed("visible", false).classed("detailed", false);
         d3.selectAll(".person-card").classed("active", false);
+        d3.selectAll(".node").classed("active", false);
     }
 });
 
@@ -408,9 +413,11 @@ searchInput.addEventListener('input', function () {
     let firstMatch = null;
     let bestScore = 0;
 
-    // Highlight matching nodes
+    // Highlight matching nodes (match name OR graduation year)
     nodeElements.each(function (d) {
-        const score = getMatchScore(d.name, query);
+        const nameScore = getMatchScore(d.name, query);
+        const yearScore = d.graduationYear ? getMatchScore(d.graduationYear, query) : 0;
+        const score = Math.max(nameScore, yearScore);
         const isMatch = score > 0;
         d3.select(this)
             .classed('search-match', isMatch)
@@ -421,7 +428,11 @@ searchInput.addEventListener('input', function () {
     cardElements.each(function () {
         const card = d3.select(this);
         const name = card.select('.person-name').text();
-        const score = getMatchScore(name, query);
+        const yearEl = card.select('.person-details .year');
+        const year = yearEl.empty() ? '' : yearEl.text();
+        const nameScore = getMatchScore(name, query);
+        const yearScore = getMatchScore(year, query);
+        const score = Math.max(nameScore, yearScore);
         const isMatch = score > 0;
 
         card.classed('search-match', isMatch).classed('search-dim', !isMatch);
