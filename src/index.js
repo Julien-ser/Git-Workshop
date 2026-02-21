@@ -191,11 +191,11 @@ d3.json(`./data.json?v=${cacheBuster}`, function (error, data) {
 
     // Create the physics simulation that positions nodes
     const simulation = d3.forceSimulation()
-        .force("link", d3.forceLink().id(d => d.id).distance(70))
-        .force("charge", d3.forceManyBody().strength(-60))
+        .force("link", d3.forceLink().id(d => d.id).distance(120))
+        .force("charge", d3.forceManyBody().strength(-100).distanceMax(300))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("collision", d3.forceCollide().radius(50));
-
+        .force("collision", d3.forceCollide().radius(20));
+        
     // =========================================================================
     // RENDER GRAPH ELEMENTS
     // =========================================================================
